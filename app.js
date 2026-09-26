@@ -103,14 +103,19 @@ $('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=$('st
 async function init(){try{const r=await fetch('./data/manifest.json');if(!r.ok)throw Error('manifest');manifest=await r.json();$('total').textContent=manifest.total.toLocaleString();renderBands();await start(1);}catch{setStatus('無法載入題庫，請確認網路後重新整理頁面。');}}
 // Opt-in diagnostics: collect in memory without changing the DOM during a tap.
 function enableTouchDiagnostics(){
-  if(typeof window==='undefined'||!new URLSearchParams(window.location.search).has('debug-touch'))return;
+  if(typeof window==='undefined')return;
+  const mode=new URLSearchParams(window.location.search).get('debug-touch');
+  if(!['1','events','layout'].includes(mode))return;
   const entries=[];
   trace=(type,extra={})=>{
     entries.push({ms:Math.round(performance.now()),type,level:current,loading,drag:drag?.id||null,...extra});
     if(entries.length>100)entries.shift();
   };
   const label=el=>el instanceof Element?(el.id||el.closest('button')?.id||el.closest('[data-car]')?.dataset.car||el.tagName):'';
-  const panel=document.createElement('div'),show=document.createElement('button'),output=document.createElement('textarea');
+  let panel;
+  if(mode!=='events'){
+  panel=document.createElement('div');
+  const show=document.createElement('button'),output=document.createElement('textarea');
   panel.style.cssText='max-width:1100px;margin:12px auto;padding:0 24px';
   show.textContent='顯示觸控診斷紀錄';
   output.readOnly=true;output.hidden=true;output.setAttribute('aria-label','觸控診斷紀錄');
@@ -121,9 +126,12 @@ function enableTouchDiagnostics(){
     output.hidden=false;output.style.display='block';
   };
   panel.append(show,output);document.querySelector('footer').after(panel);
+  }
+  // A/B probes separate event observation from the extra footer layout.
+  if(mode==='layout')return;
   for(const type of ['pointerdown','pointerup','pointercancel','gotpointercapture','lostpointercapture','touchstart','touchend','click']){
     document.addEventListener(type,e=>{
-      if(panel.contains(e.target))return;
+      if(panel?.contains(e.target))return;
       const point=e.changedTouches?.[0]||e;
       trace(type,{target:label(e.target),hit:Number.isFinite(point.clientX)?label(document.elementFromPoint(point.clientX,point.clientY)):'',pointer:e.pointerType||'',disabled:!!e.target.closest?.('button')?.disabled});
       if(type==='click')queueMicrotask(()=>trace('after-click',{status:$('status').textContent}));

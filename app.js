@@ -20,14 +20,32 @@ function paint(){
   });
   $('moves').textContent=history.length;$('undo').disabled=!history.length||loading;$('reset').disabled=loading||!cars.length;
 }
+function clearCelebration(){
+  document.querySelector('.game-card').classList.remove('celebrating');
+  document.querySelector('.confetti')?.remove();
+}
+function celebrate(){
+  clearCelebration();
+  const card=document.querySelector('.game-card');
+  card.classList.add('celebrating');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const confetti=document.createElement('div');confetti.className='confetti';confetti.setAttribute('aria-hidden','true');
+  for(let i=0;i<24;i++){
+    const piece=document.createElement('i');
+    piece.style.cssText=`--x:${8+Math.random()*84}%;--drift:${Math.random()*100-50}px;--delay:${Math.random()*.25}s;--spin:${Math.random()*540-270}deg;--color:${['#df654e','#d4b766','#79a49a','#92a771'][i%4]}`;
+    confetti.append(piece);
+  }
+  confetti.addEventListener('animationend',e=>{if(e.target===confetti)confetti.remove();});
+  card.append(confetti);
+}
 function finish(){
   if(!won(cars))return;
   const count=history.length,prior=records[current];records[current]=Number.isFinite(prior)?Math.min(prior,count):count;save();
   $('victory').hidden=false;$('win-message').textContent=count===minimum?`只用 ${count} 步，達成最佳解！`:`用了 ${count} 步，最佳解是 ${minimum} 步。`;
-  setStatus('紅車已抵達出口，做得好！');renderList();
+  celebrate();setStatus('紅車已抵達出口，做得好！');renderList();
 }
 async function start(id){
-  const version=++loadVersion;loading=true;drag=null;paint();
+  const version=++loadVersion;clearCelebration();loading=true;drag=null;paint();
   $('next').disabled=true;$('next').textContent='載入中…';setStatus('正在載入題目…');
   try{
     const row=await level(id);if(version!==loadVersion)return;
@@ -70,7 +88,7 @@ function endDrag(e,cancel=false){
 }
 $('board').addEventListener('pointerup',e=>endDrag(e));$('board').addEventListener('pointercancel',e=>endDrag(e,true));
 $('board').addEventListener('lostpointercapture',e=>endDrag(e,true));
-$('undo').onclick=()=>{if(loading||!history.length)return;drag=null;cars=history.pop();$('victory').hidden=true;paint();setStatus('已復原上一步。');};
+$('undo').onclick=()=>{if(loading||!history.length)return;clearCelebration();drag=null;cars=history.pop();$('victory').hidden=true;paint();setStatus('已復原上一步。');};
 $('reset').onclick=()=>start(current);
 $('random').onclick=()=>{if(!manifest)return;const b=manifest.bands[band],id=b.start+Math.floor(Math.random()*(b.end-b.start+1));page=Math.floor((id-b.start)/12);start(id);};
 $('next').onclick=()=>{if(loading)return;const id=current===manifest.total?1:current+1;band=manifest.bands.findIndex(b=>id>=b.start&&id<=b.end);page=Math.floor((id-manifest.bands[band].start)/12);renderBands();start(id);};

@@ -6,5 +6,20 @@
 @media(max-width:700px){h1{font-size:24px}.title-row{gap:12px}.title-row p{max-width:245px}}
 
 /* Touch screens should activate buttons without a simulated hover step. */
+.game-card{position:relative}
+.confetti{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:10;animation:confetti-layer 1.7s linear both}
+.confetti i{position:absolute;left:var(--x);top:12%;width:8px;height:13px;border-radius:2px;background:var(--color);opacity:0;animation:confetti-fall 1.35s var(--delay) ease-out both}
+.confetti i:nth-child(3n){border-radius:50%;width:9px;height:9px}
+.celebrating #victory{animation:victory-arrive .45s ease-out both}
+.celebrating .win-icon{animation:win-pop .65s .1s both}
+.celebrating .car.target{opacity:1;animation:car-cheer .6s ease-out both}
+.celebrating .exit{animation:exit-glow .8s ease-out 2}
+@keyframes confetti-layer{to{opacity:1}}
+@keyframes confetti-fall{0%{opacity:0;transform:translateY(-25px) rotate(0)}15%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translate(var(--drift),280px) rotate(var(--spin))}}
+@keyframes victory-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes win-pop{0%{transform:scale(.5) rotate(-15deg)}55%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes car-cheer{40%{filter:brightness(1.25);box-shadow:0 0 0 5px #e36b5233,0 0 22px #e36b5266}100%{filter:brightness(1)}}
+@keyframes exit-glow{50%{background:#e2ebba;box-shadow:0 0 18px #d9e1be99}}
+@media(prefers-reduced-motion:reduce){.celebrating #victory,.celebrating .win-icon,.celebrating .car.target,.celebrating .exit{animation:none}.confetti{display:none}}
 button{touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){button:hover:not(:disabled){background:#e9eadd}.dark-button:hover:not(:disabled){background:#466155}}

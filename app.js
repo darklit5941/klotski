@@ -2,6 +2,7 @@ import {parseBoard,limits,move,won} from './engine.js';
 const $=id=>document.getElementById(id), palette=['#d4b766','#79a49a','#92a771','#7d9eaf','#bf947b','#aaa0bf','#afbb8d','#91b4b8','#c79c9b','#a7ae75','#7dada5'];
 let manifest,band=0,page=0,current=1,minimum=1,cars=[],history=[],drag=null,loading=false,loadVersion=0,listVersion=0;
 const cache=new Map();let records={};
+let trace=()=>{};
 try{records=JSON.parse(localStorage.getItem('ranglu-progress')||'{}');if(!records||typeof records!=='object')records={};}catch{}
 const save=()=>{try{localStorage.setItem('ranglu-progress',JSON.stringify(records));}catch{}};
 async function chunk(n){if(!cache.has(n)){const pending=fetch(`./data/${n}.json`).then(r=>{if(!r.ok)throw Error('data');return r.json()}).catch(e=>{cache.delete(n);throw e});cache.set(n,pending);}return cache.get(n);}
@@ -45,6 +46,7 @@ function finish(){
   celebrate();setStatus('紅車已抵達出口，做得好！');renderList();
 }
 async function start(id){
+  trace('load-start',{requested:id});
   const version=++loadVersion;clearCelebration();loading=true;drag=null;paint();
   $('next').disabled=true;$('next').textContent='載入中…';setStatus('正在載入題目…');
   try{
@@ -52,7 +54,7 @@ async function start(id){
     current=id;minimum=row[0];cars=parseBoard(row[1]);history=[];loading=false;
     $('level-label').textContent=`#${String(id).padStart(3,'0')}`;$('minimum').textContent=minimum;
     $('difficulty').textContent=manifest.bands.find(b=>id>=b.start&&id<=b.end).name;
-    $('victory').hidden=true;paint();setStatus('按住車輛拖曳，放開滑鼠即可停車。');renderList();
+    $('victory').hidden=true;paint();setStatus('按住車輛拖曳，放開滑鼠即可停車。');renderList();trace('load-success');
   }catch{if(version!==loadVersion)return;loading=false;paint();setStatus('題目載入失敗，請重試。');}
   finally{if(version===loadVersion){$('next').disabled=false;$('next').textContent='下一題 →';}}
 }
@@ -99,4 +101,35 @@ $('next').onclick=()=>{if(loading)return;const id=current===manifest.total?1:cur
 $('prev-page').onclick=()=>{page--;renderList()};$('next-page').onclick=()=>{page++;renderList()};
 $('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=$('start-playing').onclick=()=>$('help-dialog').close();
 async function init(){try{const r=await fetch('./data/manifest.json');if(!r.ok)throw Error('manifest');manifest=await r.json();$('total').textContent=manifest.total.toLocaleString();renderBands();await start(1);}catch{setStatus('無法載入題庫，請確認網路後重新整理頁面。');}}
+// Opt-in diagnostics: collect in memory without changing the DOM during a tap.
+function enableTouchDiagnostics(){
+  if(typeof window==='undefined'||!new URLSearchParams(window.location.search).has('debug-touch'))return;
+  const entries=[];
+  trace=(type,extra={})=>{
+    entries.push({ms:Math.round(performance.now()),type,level:current,loading,drag:drag?.id||null,...extra});
+    if(entries.length>100)entries.shift();
+  };
+  const label=el=>el instanceof Element?(el.id||el.closest('button')?.id||el.closest('[data-car]')?.dataset.car||el.tagName):'';
+  const panel=document.createElement('div'),show=document.createElement('button'),output=document.createElement('textarea');
+  panel.style.cssText='max-width:1100px;margin:12px auto;padding:0 24px';
+  show.textContent='顯示觸控診斷紀錄';
+  output.readOnly=true;output.hidden=true;output.setAttribute('aria-label','觸控診斷紀錄');
+  output.style.cssText='display:block;width:100%;height:240px;font-size:12px;margin-top:10px';
+  output.style.display='none';
+  show.onclick=()=>{
+    output.value=JSON.stringify({version:$('build-version').textContent,agent:navigator.userAgent,events:entries},null,2);
+    output.hidden=false;output.style.display='block';
+  };
+  panel.append(show,output);document.querySelector('footer').after(panel);
+  for(const type of ['pointerdown','pointerup','pointercancel','gotpointercapture','lostpointercapture','touchstart','touchend','click']){
+    document.addEventListener(type,e=>{
+      if(panel.contains(e.target))return;
+      const point=e.changedTouches?.[0]||e;
+      trace(type,{target:label(e.target),hit:Number.isFinite(point.clientX)?label(document.elementFromPoint(point.clientX,point.clientY)):'',pointer:e.pointerType||'',disabled:!!e.target.closest?.('button')?.disabled});
+      if(type==='click')queueMicrotask(()=>trace('after-click',{status:$('status').textContent}));
+    },{capture:true,passive:true});
+  }
+}
+enableTouchDiagnostics();
+
 init();

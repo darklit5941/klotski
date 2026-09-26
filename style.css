@@ -23,3 +23,5 @@
 @media(prefers-reduced-motion:reduce){.celebrating #victory,.celebrating .win-icon,.celebrating .car.target,.celebrating .exit{animation:none}.confetti{display:none}}
 button{touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){button:hover:not(:disabled){background:#e9eadd}.dark-button:hover:not(:disabled){background:#466155}}
+
+.build-version{display:block;margin-top:5px;font-size:10px;color:#777e73;font-family:ui-monospace,monospace;letter-spacing:.3px}

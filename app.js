@@ -74,7 +74,10 @@ $('board').addEventListener('pointerdown',e=>{
   const el=e.target.closest('.car');if(!el||loading||won(cars)||e.button!==0||drag)return;
   const car=cars.find(c=>c.id===el.dataset.car),bounds=limits(cars,car.id),pos=car.horizontal?car.x:car.y;
   drag={id:car.id,pointer:e.pointerId,el,start:car.horizontal?e.clientX:e.clientY,pos,horizontal:car.horizontal,cell:$('board').clientWidth/6,...bounds,delta:0};
-  el.setPointerCapture(e.pointerId);el.classList.add('dragging');e.preventDefault();
+  // Keep capture on the board: paint() replaces the car elements.
+  $('board').setPointerCapture(e.pointerId);el.classList.add('dragging');
+  // CSS touch-action handles touch gestures without suppressing later clicks.
+  if(e.pointerType==='mouse')e.preventDefault();
 });
 $('board').addEventListener('pointermove',e=>{
   if(!drag||drag.pointer!==e.pointerId)return;
@@ -83,6 +86,7 @@ $('board').addEventListener('pointermove',e=>{
 });
 function endDrag(e,cancel=false){
   if(!drag||drag.pointer!==e.pointerId)return;const d=drag;drag=null;
+  if($('board').hasPointerCapture(d.pointer))$('board').releasePointerCapture(d.pointer);
   if(!cancel){const pos=Math.max(d.min,Math.min(d.max,d.pos+Math.round(d.delta/d.cell)));const snapshot=cars.map(c=>({...c}));if(move(cars,d.id,pos)){history.push(snapshot);setStatus('繼續挪一挪，替紅車留出路。');}}
   paint();finish();
 }

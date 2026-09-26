@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f3ec"><meta name="description" content="用滑鼠拖動車輛，解開停車場的難題。476,118 題汽車華容道，從暖身到大師。">
+<title>讓路！汽車華容道</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23e3654b'/%3E%3Cpath d='M8 20h23m-8-8 8 8-8 8' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script>
+</head>
+<body>
+<header><a class="brand" href="./"><span class="brand-mark">↗</span><span>讓路！<small>汽車華容道</small></span></a><span class="header-note">一格一格，找到出口。</span><button id="help" class="text-button">玩法說明 <span>↗</span></button></header>
+<main>
+<section class="play-section">
+<div class="section-top"><span class="eyebrow">RUSH HOUR / 腦力停車場</span><span class="live-dot">滑鼠拖曳就能玩</span></div>
+<div class="title-row"><div><h1>解開車陣，<br>讓紅車回家。</h1><p>車子只能前進、後退。把出口讓出來吧。</p></div><span class="level-badge" id="difficulty">暖身</span></div>
+<div class="game-card">
+<div class="scorebar"><div><span>目前關卡</span><strong id="level-label">載入中</strong></div><div><span>移動次數</span><strong id="moves">0</strong></div><div><span>最少步數</span><strong id="minimum">—</strong></div></div>
+<div class="parking"><div class="parking-label">P <span>PUZZLE PARKING</span><span class="north">出口在右側 →</span></div><div class="board-wrap"><div id="board" aria-label="汽車華容道棋盤"></div><div class="exit" aria-hidden="true">→<small>出口</small></div></div><div class="parking-bottom"><span>06 × 06</span><span>拖動紅車到右側邊界即可過關</span></div></div>
+<div class="game-actions"><button id="undo" disabled>↶ <span>復原一步</span></button><button id="reset" disabled>↻ <span>重新開始</span></button><button id="random" class="dark-button">⤨ <span>隨機一題</span></button></div>
+<p id="status" role="status" aria-live="polite">正在準備停車場…</p>
+<div id="victory" hidden><span class="win-icon">✓</span><div><h2>順利出發！</h2><p id="win-message"></p></div><button id="next" class="dark-button">下一題 →</button></div>
+</div>
+</section>
+<aside>
+<div class="library-heading"><span class="eyebrow">PICK YOUR CHALLENGE</span><h2>今天，挑戰哪一題？</h2><p><span id="total">476,118</span> 道難題，慢慢解也沒關係。</p></div>
+<div id="bands" class="bands" aria-label="選擇難度"></div>
+<div class="level-list-head"><h3 id="list-title">暖身題庫</h3><span id="range"></span></div>
+<div id="levels" class="levels" aria-label="選擇關卡"></div>
+<div class="pagination"><button id="prev-page" aria-label="上一頁">←</button><span id="page-label"></span><button id="next-page" aria-label="下一頁">→</button></div>
+<div class="tip"><span>↗</span><div><strong>先讓一步，也是一種前進。</strong><p>試著先移開擋路的車，再替紅車留出一條路。</p></div></div>
+<div class="legend"><span><i></i> 紅車是主角</span><span>✓ 已完成的關卡會留在這台裝置</span></div>
+</aside>
+</main>
+<footer><span>不趕時間，只動腦筋。</span><span>題庫來源 <a href="https://www.michaelfogleman.com/rush/" target="_blank" rel="noreferrer">Michael Fogleman ↗</a></span></footer>
+<dialog id="help-dialog"><button id="close-help" class="close" aria-label="關閉說明">×</button><span class="eyebrow">HOW TO PLAY</span><h2>幫紅車找到出口</h2><ol><li>按住車輛，沿著車身方向拖曳。</li><li>橫車只能左右移動，直車只能上下移動，不能穿過其他車輛。</li><li>把紅車移到第三列最右側，就能過關。</li></ol><p>一次連續拖曳算一步，不論移動幾格。按「復原一步」可以收回上一步；「重新開始」會重置目前這題。</p><button id="start-playing" class="dark-button">知道了，來玩吧 →</button></dialog>
+</body></html>

@@ -101,11 +101,12 @@ $('next').onclick=()=>{if(loading)return;const id=current===manifest.total?1:cur
 $('prev-page').onclick=()=>{page--;renderList()};$('next-page').onclick=()=>{page++;renderList()};
 $('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=$('start-playing').onclick=()=>$('help-dialog').close();
 async function init(){try{const r=await fetch('./data/manifest.json');if(!r.ok)throw Error('manifest');manifest=await r.json();$('total').textContent=manifest.total.toLocaleString();renderBands();await start(1);}catch{setStatus('無法載入題庫，請確認網路後重新整理頁面。');}}
-// Opt-in diagnostics: collect in memory without changing the DOM during a tap.
-function enableTouchDiagnostics(){
+// Use the event-only path verified on iPhone; the diagnostic panel stays opt-in.
+// Observation is passive, bounded in memory, and never updates the DOM during a tap.
+function setupTouchObservation(){
   if(typeof window==='undefined')return;
-  const mode=new URLSearchParams(window.location.search).get('debug-touch');
-  if(!['1','events','layout'].includes(mode))return;
+  const requestedMode=new URLSearchParams(window.location.search).get('debug-touch');
+  const mode=['1','layout'].includes(requestedMode)?requestedMode:'events';
   const entries=[];
   trace=(type,extra={})=>{
     entries.push({ms:Math.round(performance.now()),type,level:current,loading,drag:drag?.id||null,...extra});
@@ -138,6 +139,6 @@ function enableTouchDiagnostics(){
     },{capture:true,passive:true});
   }
 }
-enableTouchDiagnostics();
+setupTouchObservation();
 
 init();

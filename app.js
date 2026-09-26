@@ -27,14 +27,16 @@ function finish(){
   setStatus('紅車已抵達出口，做得好！');renderList();
 }
 async function start(id){
-  const version=++loadVersion;loading=true;drag=null;paint();$('victory').hidden=true;setStatus('正在載入題目…');
+  const version=++loadVersion;loading=true;drag=null;paint();
+  $('next').disabled=true;$('next').textContent='載入中…';setStatus('正在載入題目…');
   try{
     const row=await level(id);if(version!==loadVersion)return;
     current=id;minimum=row[0];cars=parseBoard(row[1]);history=[];loading=false;
     $('level-label').textContent=`#${String(id).padStart(3,'0')}`;$('minimum').textContent=minimum;
     $('difficulty').textContent=manifest.bands.find(b=>id>=b.start&&id<=b.end).name;
-    paint();setStatus('按住車輛拖曳，放開滑鼠即可停車。');renderList();
-  }catch{if(version!==loadVersion)return;loading=false;paint();setStatus('題目載入失敗，請再點一次關卡重試。');}
+    $('victory').hidden=true;paint();setStatus('按住車輛拖曳，放開滑鼠即可停車。');renderList();
+  }catch{if(version!==loadVersion)return;loading=false;paint();setStatus('題目載入失敗，請重試。');}
+  finally{if(version===loadVersion){$('next').disabled=false;$('next').textContent='下一題 →';}}
 }
 function renderBands(){
   $('bands').replaceChildren();manifest.bands.forEach((b,i)=>{const el=document.createElement('button');el.className=`band ${i===band?'active':''}`;el.setAttribute('aria-pressed',i===band);el.innerHTML=`${b.name}<small>${b.min}–${b.max} 步</small>`;el.onclick=()=>{band=i;page=0;renderBands();renderList()};$('bands').append(el)});
@@ -71,7 +73,7 @@ $('board').addEventListener('lostpointercapture',e=>endDrag(e,true));
 $('undo').onclick=()=>{if(loading||!history.length)return;drag=null;cars=history.pop();$('victory').hidden=true;paint();setStatus('已復原上一步。');};
 $('reset').onclick=()=>start(current);
 $('random').onclick=()=>{if(!manifest)return;const b=manifest.bands[band],id=b.start+Math.floor(Math.random()*(b.end-b.start+1));page=Math.floor((id-b.start)/12);start(id);};
-$('next').onclick=()=>{const id=current===manifest.total?1:current+1;band=manifest.bands.findIndex(b=>id>=b.start&&id<=b.end);page=Math.floor((id-manifest.bands[band].start)/12);renderBands();start(id);};
+$('next').onclick=()=>{if(loading)return;const id=current===manifest.total?1:current+1;band=manifest.bands.findIndex(b=>id>=b.start&&id<=b.end);page=Math.floor((id-manifest.bands[band].start)/12);renderBands();start(id);};
 $('prev-page').onclick=()=>{page--;renderList()};$('next-page').onclick=()=>{page++;renderList()};
 $('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=$('start-playing').onclick=()=>$('help-dialog').close();
 async function init(){try{const r=await fetch('./data/manifest.json');if(!r.ok)throw Error('manifest');manifest=await r.json();$('total').textContent=manifest.total.toLocaleString();renderBands();await start(1);}catch{setStatus('無法載入題庫，請確認網路後重新整理頁面。');}}

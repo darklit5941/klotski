@@ -25,3 +25,4 @@ button{touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){button:hover:not(:disabled){background:#e9eadd}.dark-button:hover:not(:disabled){background:#466155}}
 
 .build-version{display:block;margin-top:5px;font-size:10px;color:#777e73;font-family:ui-monospace,monospace;letter-spacing:.3px}
+footer{align-items:center;flex-wrap:wrap;gap:16px}.footer-links{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px}.report-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:12px;white-space:nowrap;touch-action:manipulation;transition:background .15s}@media(hover:hover) and (pointer:fine){.report-button:hover{background:#e9eadd}}
